@@ -259,8 +259,7 @@ class Server(Chat):
         """Disconecta todas as conexoes"""
         for cli in self.clients:
             self.remove(cli.get_id())
-        self.socket.close()
-        del self.socket        
+        self.socket.close()        
         print 'Disconnected'
    
     

@@ -99,7 +99,7 @@ class GUI_Server(GUI):
         
         
     def server_run(self):
-        """"""        
+        """"""       
         gtk.gdk.threads_leave()
         thread.start_new_thread(self.server.run, ())        
         gtk.gdk.threads_init()
