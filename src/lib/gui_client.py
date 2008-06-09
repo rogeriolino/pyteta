@@ -4,25 +4,24 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gtk.glade, gobject
 
-import sys
 from time import strftime
 
 from chat import *
 from message import *
 from client import Client
+from gui import GUI
 
 
 # todas as janelas de pvt
 pvts = {}
 
 
-class GUI_Client:
+class GUI_Client(GUI):
 
-    # caminho completo
-    PATH = sys.path[0]
-    
+   
     
     def __init__(self):
+        GUI.__init__(self)
         # titulo das janelas
         self.title = 'PyTETA'
         self.window = None
@@ -35,7 +34,7 @@ class GUI_Client:
     def start(self):
         """Inicia o programa"""
         try:
-            self.xml = gtk.glade.XML('%s/glade/chat.glade' % self.PATH)
+            self.xml = gtk.glade.XML('%s/glade/chat.glade' % self.getDir())
             self.xml.signal_autoconnect(self)
             # Window
             self.window = self.xml.get_widget('chat')            
@@ -64,7 +63,7 @@ class GUI_Client:
         # mark
         self.mark = self.buffer.create_mark("end", self.buffer.get_end_iter(), False)
         # background
-        self.pixmap, mask = gtk.gdk.pixbuf_new_from_file('%s/imgs/pateta.png' % self.PATH).render_pixmap_and_mask()
+        self.pixmap, mask = gtk.gdk.pixbuf_new_from_file('%s/imgs/pateta.png' % self.getDir()).render_pixmap_and_mask()
         self.txt_chat.get_window(gtk.TEXT_WINDOW_TEXT).set_back_pixmap(self.pixmap, False)
         self.txt_send = self.xml.get_widget('txt_send')
         self.txt_send.connect("activate", self.on_btn_send_clicked)
@@ -358,35 +357,6 @@ class GUI_Client:
             self.tv_clients_model.append([v])
         
         
-    def on_window_destroy(self, widget):
-    	""""""
-        if self.window != None:
-            self.window.destroy()
-            self.window = None
-        
-        
-    def show_dialog(self, type, buttons, msg):
-        """Exibe uma janela do tipo Dialog"""
-        dialog = gtk.MessageDialog(None, gtk.DIALOG_MODAL, type, buttons, msg)        
-        dialog.set_title(self.title)
-        #dialog.set_icon_from_file(self.icon)
-        dialog.width, dialog.height = dialog.get_size()
-        dialog.move(gtk.gdk.screen_width()/2-dialog.width/2, gtk.gdk.screen_height()/2-dialog.height/2)
-        op = dialog.run()
-        dialog.destroy()
-        return op
-            
-            
-    def show_alert(self, msg):
-        """Exibe janela do tipo Alert"""
-        return self.show_dialog(gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, msg)
-            
-            
-    def show_confirm(self, msg):
-        """Exibe janela do tipo confirmacao (Cancel, OK) e retorna o valor escolhido"""
-        return self.show_dialog(gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, msg)
-            
-            
     def gtk_main_quit(self, widget):
         self.client.disconnect()
         gtk.main_quit(0)
@@ -405,7 +375,7 @@ class Settings(GUI_Client):
     def show(self):
     	"""Exibe a janela de configuracao"""
     	try:
-            self.xml = gtk.glade.XML('%s/glade/settings.glade' % self.PATH)
+            self.xml = gtk.glade.XML('%s/glade/settings.glade' % self.getDir())
             self.xml.signal_autoconnect(self)
             self.window = self.xml.get_widget('settings')
             self.set_inputs()
@@ -450,7 +420,7 @@ class PVT(GUI_Client):
     
     def __init__(self, client, dest_id, dest_nick):
         GUI_Client.__init__(self)
-        self.xml = gtk.glade.XML('%s/glade/pvt.glade' % self.PATH)
+        self.xml = gtk.glade.XML('%s/glade/pvt.glade' % self.getDir())
         self.xml.signal_autoconnect(self)
         self.window = self.xml.get_widget('pvt')
         # id do cliente destino

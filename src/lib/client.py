@@ -23,7 +23,7 @@ class Client(Chat):
         self.set_nick_name(ini['nick_name'])
         self.set_quit_msg(ini['quit_msg'])
         self.set_server_port(ini['server_port'])
-        self.set_server_host(ini['server_host'])        
+        self.set_server_host(ini['server_host'])
         
     def get_id(self):
         """Return the Client id"""

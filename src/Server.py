@@ -12,12 +12,22 @@
 
 """
 
-from lib.server import Server
 
 if __name__ == '__main__':
+    
+    from lib.gui_server import *
+    
     try:
-        server = Server()
-        server.run()
+        
+        
+        server = GUI_Server()
+        server.start()
+
+        gtk.gdk.threads_init()        
+        gtk.main()
+        gtk.gdk.threads_leave()
+        
     except:
         import traceback
         traceback.print_exc()
+        

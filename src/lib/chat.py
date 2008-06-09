@@ -29,8 +29,7 @@ class Chat:
         errors = ['Por favor, informa um número para porta.', 'Número da porta é inválido.', 'A porta informada é reservada, favor informar outra.']
         e = self.is_valid_port(port)
         if e != -1:
-            raise IMException(e)
-            raise IMException(erros[e])
+            raise IMException(errors[e])
         self.server_port = int(port)
         
     def get_server_port(self):
@@ -43,6 +42,18 @@ class Chat:
         
     def get_server_host(self):
         return self.server_host
+    
+    def set_max_conn(self, max):
+        try:
+            max = int(max)
+            if max < 0 or max > 65000:
+                raise IMException('Número máximo de conexões fora da margem aceitável (0 - 65000).')
+            self.MAX_CONN = max
+        except ValueError:
+            raise IMException('Número máximo de conexões inválido.')
+                
+    def get_max_conn(self):
+        return self.MAX_CONN
             
     def close(self):
         """Fecha a conexao do socket"""

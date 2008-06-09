@@ -12,8 +12,6 @@ class Server(Chat):
         The Server class
     """
     
-    # numero maximo de conexoes
-    MAX_CONN = 10
     
     def __init__(self):
         Chat.__init__(self)
@@ -78,7 +76,7 @@ class Server(Chat):
                             receive = Event(Message.CLIENT_SERVER, 'I')
                             receive.decode(data)
                             # cliente ainda nao existe, mas o servidor esta cheio
-                            if client == None and len(self.clients) > self.MAX_CONN:
+                            if client == None and len(self.clients) > self.get_max_conn():
                                 # envia mensagem alertando
                                 message = Event(Message.SERVER_CLIENT, '!')
                                 message.set_data('O Servidor está cheio.')
@@ -207,9 +205,10 @@ class Server(Chat):
     def set_server(self):
         """Resgata as informacoes de conexao do arquivo de configuracao"""
         ini = IOConf.read()
-        self.set_server_port(ini['server_port'])
-
-            
+        self.set_server_port(ini['server_port'])       
+        self.MAX_CONN = ini['max_conn']
+        
+    
     def send_connecteds(self, conn):
         """Envia para a conexao especificada todos os usuarios conectados"""
         message = Event(Message.SERVER_CLIENT, 'L')
@@ -217,6 +216,7 @@ class Server(Chat):
             message.set_id(self.clients[k].get_id())
             message.set_data(self.clients[k].get_nick_name())
             conn.sendall(message.encode())
+    
     
     def send_to(self, id, signal):
         """Send the signal for especify client"""
@@ -226,17 +226,20 @@ class Server(Chat):
             import traceback
             traceback.print_exc()
             
+            
     def send_to_all(self, message, skip = None):
         """Envia uma mensage para todos os clientes"""
         for k in self.connections.keys():
             if skip != k:
                 self.connections[k].send(message)
             
+            
     def exists(self, nick):
         """Verifica se já existe o nick no servidor"""
         if nick in [ self.clients[k].get_nick_name() for k in self.clients.keys() ]:
             return True
         return False
+        
         
     def add_client(self, id, client):
         """Adiciona um novo cliente na lista de clientes conectados"""
@@ -245,21 +248,27 @@ class Server(Chat):
         self.clients[id] = client
         return True
     
+    
     def add_connection(self, id, conn):
         """Adiciona uma nova conexao na lista de conexoes"""
         self.connections[id] = conn
         return True
     
+    
     def disconnect(self):
         """Disconecta todas as conexoes"""
         for cli in self.clients:
             self.remove(cli.get_id())
+        self.socket.close()
+        del self.socket        
         print 'Disconnected'
+   
     
     def remove(self, id):
         """Remove o cliente e sua conexao do id informado"""
         self.remove_client(id)
         self.remove_connection(id)
+    
     
     def remove_client(self, id):
         """Remove o cliente da lista de clientes conectados"""
@@ -268,6 +277,7 @@ class Server(Chat):
         except:
             pass
         
+        
     def remove_connection(self, id):
         """Remove a conexao da lista de conexoes"""
         try:
@@ -275,6 +285,7 @@ class Server(Chat):
             conn.close()
         except:
             pass
+
 
     def welcome(self):
         """Retorna a mensagem de Welcome do servidor"""
