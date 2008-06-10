@@ -248,6 +248,19 @@ class GUI_Client(GUI):
             self.append_line(e.get_message(), 'red')
             self.show_alert(e.get_message())
             
+    
+    def parse_message(self, msg):
+        """"""
+        cmd = msg.split()
+        if len(cmd) > 1:
+            if cmd[0] == '/nick':
+                self.client.set_nick_name(cmd[1])
+                self.client.send_nick_name()
+                return True
+            if cmd[0] == '/pvt' and cmd[1] in self.clients.values():
+                return True
+        return False
+            
             
     def on_btn_disconnect_clicked(self, widget):
         """
@@ -281,7 +294,8 @@ class GUI_Client(GUI):
             if self.connected:
                 data = self.txt_send.get_text()
                 self.txt_send.set_text('')
-                self.client.send(data)
+                if not self.parse_message(data):
+                    self.client.send(data)
         except IMException, e:
             self.append_line(e.get_message(), 'red')
             self.show_alert(e.get_message())
@@ -439,6 +453,8 @@ class PVT(GUI_Client):
         self.receive = self.xml.get_widget('txt_receive')
         self.rbuffer = self.receive.get_buffer()
         #self.send.set_size_request(0, 50)
+        # mark
+        self.mark = self.rbuffer.create_mark("end", self.rbuffer.get_end_iter(), False)
         
         self.receive = self.xml.get_widget('txt_receive')
         
@@ -467,6 +483,7 @@ class PVT(GUI_Client):
         tag.set_property("size-points", 12)
         tag.set_property("weight", 600)        
         self.rbuffer.insert_with_tags(self.rbuffer.get_end_iter(), '%s\n' % msg, tag)
+        self.receive.scroll_to_mark(self.mark, 0.05, True, 0.0, 1.0)
     
     
     def client_say(self, nickname, msg, color):

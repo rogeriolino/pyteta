@@ -125,23 +125,25 @@ class Server(Chat):
                                 else:
                                     # envia mensagem alertando
                                     message = Event(Message.SERVER_CLIENT, '!')
-                                    message.set_data('Nickname já existe')
+                                    message.set_data('Nickname já está em uso, favor escolher outro.')
                                     conn.send(message.encode())
                                     # e remove a conexao
                                     self.remove(client.get_id())
                                     return
                             # mudanca de nickname
                             else:
-                                # guarda nick velho so para exibir mudanca
-                                old = client.get_nick_name()
-                                # altera nickname
-                                client.set_nick_name(receive.get_data())
-                                # envia mensagem que usuário entrou para todos
-                                message = Event(Message.SERVER_CLIENT, 'I')
-                                message.set_id(client.get_id())
-                                message.set_data(client.get_nick_name())
-                                self.send_to_all(message.encode())
-                                print '%s mudou nick para %s' % (old, client.get_nick_name())                        
+                                # se novo nick nao esta em uso                                
+                                if not self.exists(receive.get_data()):
+                                    # guarda nick velho so para exibir mudanca
+                                    old = client.get_nick_name()
+                                    # altera nickname
+                                    client.set_nick_name(receive.get_data())
+                                    # envia mensagem que usuário entrou para todos
+                                    message = Event(Message.SERVER_CLIENT, 'I')
+                                    message.set_id(client.get_id())
+                                    message.set_data(client.get_nick_name())
+                                    self.send_to_all(message.encode())
+                                    print '%s mudou nick para %s' % (old, client.get_nick_name())                        
                         # mensagem para todos
                         elif data[0] == 'A':
                             # decodifica a mensagem para enviar a todos
@@ -308,6 +310,7 @@ class Server(Chat):
         w.append(" ++                                                               `         ++ ")
         w.append(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ")
         return '\n'.join(w)
+          
         
         
 
