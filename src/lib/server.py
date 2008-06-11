@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+import time
 import thread
 
 from chat import *
@@ -19,6 +20,7 @@ class Server(Chat):
         self.clients = {}
         self.connections = {}
         self.set_server()
+        self.running = False
     
     def run(self):
         """Executa o servico"""
@@ -28,17 +30,31 @@ class Server(Chat):
             # cria o socket
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+            self.socket.setblocking(False)
             # bind o socket a partir da porta configurada
             self.socket.bind(('0.0.0.0', self.get_server_port()))
             # backlog
-            self.socket.listen(1)
-            while 1:
+            self.socket.listen(5)
+            # rodando
+            self.running = True
+            while self.running:
                 # aceita nova conexao
-                conn, addr = self.socket.accept()
-                thread.start_new_thread(self.listen, (conn, addr))
+                try:
+                    conn, addr = self.socket.accept()                
+                    thread.start_new_thread(self.listen, (conn, addr))
+                except:
+                    time.sleep(0.1)
+            # fecha as conexoes
+            self.disconnect()
+        except socket.error, e:
+            print 'Erro: %s' % e.get_message()
+            self.disconnect()
         except IMException, e:
             print 'Erro: %s' % e.get_message()
             self.disconnect()
+        except:
+            import traceback
+            traceback.print_exc()
 
         
     def listen(self, conn, addr):
@@ -47,7 +63,7 @@ class Server(Chat):
             client = None
             ip = addr[0]
             port = addr[1]
-            while 1:
+            while self.running:
                 full_data = conn.recv(self.get_data_size())
                 # cliente desconectou
                 if not full_data and client != None:
@@ -174,20 +190,26 @@ class Server(Chat):
                         elif data[0] == 'S':
                             # decodifica a mensagem para enviar a todos
                             receive = Event(Message.CLIENT_SERVER, 'S')
-                            receive.set_id(client.get_id())
                             receive.decode(data)
-                            # envia mensagem para todos
+                            # envia mensagem para todos                           
                             message = Event(Message.SERVER_CLIENT, 'S')
                             message.set_id(client.get_id())
                             message.set_data(receive.get_data())
                             self.send_to_all(message.encode())
+                            # imprime mensagem para log/debug
+                            print 'Saiu  : %s, \tID: %s, \tMensagem: %s' % (client.get_nick_name(), client.get_id(), receive.get_data())
                             # remove cliente e conexao (desconecta)
                             self.remove(client.get_id())
                             return
-                        
+        
+        except socket.error, e:
+            print 'Erro: %s' % e.get_message()
+            
         except IMException, e:
             self.remove(client.get_id())
-            print 'Erro: %s' % e.get_message()         
+            print 'Erro: %s' % e.get_message()
+        
+        except:         
             import traceback
             traceback.print_exc()
 

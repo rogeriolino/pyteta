@@ -24,3 +24,7 @@ if __name__ == '__main__':
         
     except IMException, e:
         print e.get_message()
+    
+    except:
+        import traceback
+        traceback.print_exc()

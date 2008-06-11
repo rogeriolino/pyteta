@@ -59,6 +59,7 @@ class Chat:
         """Fecha a conexao do socket"""
         if self.get_socket() != None:
             self.socket.close()
+            self.socket = None
             
     def is_valid_ip(self, ip):
         """Verifica se e um endereco de ip valido"""

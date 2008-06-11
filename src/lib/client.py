@@ -40,9 +40,9 @@ class Client(Chat):
     def set_port(self, port):
         """Set the Client port"""
         try:
-	        self.port = int(port)
-	except ValueError:
-		raise IMException('A porta do servidor deve ser um inteiro')
+            self.port = int(port)
+        except ValueError:
+	       raise IMException('A porta do servidor deve ser um inteiro')
     
     def get_nick_name(self):
         """Return the Client nick name"""
@@ -73,6 +73,7 @@ class Client(Chat):
         message = Public(Message.CLIENT_SERVER)
         message.set_data(data)
         self.socket.sendall(message.encode())
+            
     
     def send_to(self, id, data):
         """Envia uma mensagem privada para o id especificado"""
@@ -109,7 +110,6 @@ class Client(Chat):
         if msg:
             self.send_close_msg(msg)
         self.close()
-        self.socket = None
         
     def response(self):
         """Retorna uma string contendo a mensagem do servidor"""

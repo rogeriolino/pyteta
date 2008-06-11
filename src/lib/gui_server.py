@@ -76,7 +76,7 @@ class GUI_Server(GUI):
     def on_btn_stop_clicked(self, widget):
         """"""
         try:
-            self.server.disconnect()
+            self.server.running = False
             self.connected = False
             self.toggle_connect_button(self.connected)
         except IMException, e:

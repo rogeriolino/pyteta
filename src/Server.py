@@ -23,7 +23,7 @@ if __name__ == '__main__':
         server = GUI_Server()
         server.start()
 
-        gtk.gdk.threads_init()        
+        gtk.gdk.threads_init()
         gtk.main()
         gtk.gdk.threads_leave()
         

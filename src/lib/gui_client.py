@@ -193,18 +193,41 @@ class GUI_Client(GUI):
             self.append_line(e.get_message(), 'red')
             self.show_alert(e.get_message())
             return False
-        
+           
+    
+    def parse_message(self, msg):
+        """"""
+        cmd = msg.split()
+        if len(cmd) > 1:
+            if cmd[0] == '/quit':
+                msg = ' '.join(cmd[1:])
+                self.client.set_quit_msg(msg)                
+                self.disconnect()
+                return True
+            if cmd[0] == '/nick':
+                self.client.set_nick_name(cmd[1])
+                self.client.send_nick_name()
+                return True
+            if cmd[0] == '/pvt' and cmd[1] in self.clients.values():
+                return True
+        return False
+
         
     def disconnect(self):
         """Desconecta do servidor"""
         try:
             if self.connected:
-                self.connected = False
-                self.client.disconnect(self.client.get_quit_msg())                                
-            self.toggle_connect_button(False)
-            # fecha os pvts abertos
-            for k in pvts.keys():
-                pvts.pop(k).on_window_destroy(None)
+                self.connected = False                            
+                self.clients.clear()
+                self.set_treeview()
+                gobject.source_remove(self.thread_id)                
+                self.client.disconnect(self.client.get_quit_msg())                                                
+                self.toggle_connect_button(False)
+                # imprime mensagem no chat
+                self.client_signout(self.client.get_nick_name(), self.client.get_quit_msg())
+                # fecha os pvts abertos
+                for k in pvts.keys():
+                    pvts.pop(k).on_window_destroy(None)
         except IMException, e:
             self.show_alert(e.get_message())        
         
@@ -240,6 +263,8 @@ class GUI_Client(GUI):
                 self.has_confirm = False
                 # envia o nickname para receber confirmacao de conexao
                 self.client.send_nick_name()                
+                # limpa o chat
+                self.clear()
                 # chama thread para checar novas mensages, e guarda o id da thread
                 self.thread_id = gobject.io_add_watch(self.client.get_socket(), gobject.IO_IN, self.check_messages)
             self.toggle_connect_button(True)
@@ -247,19 +272,6 @@ class GUI_Client(GUI):
             self.disconnect()
             self.append_line(e.get_message(), 'red')
             self.show_alert(e.get_message())
-            
-    
-    def parse_message(self, msg):
-        """"""
-        cmd = msg.split()
-        if len(cmd) > 1:
-            if cmd[0] == '/nick':
-                self.client.set_nick_name(cmd[1])
-                self.client.send_nick_name()
-                return True
-            if cmd[0] == '/pvt' and cmd[1] in self.clients.values():
-                return True
-        return False
             
             
     def on_btn_disconnect_clicked(self, widget):
@@ -270,10 +282,7 @@ class GUI_Client(GUI):
             obs: Exibe uma janela de confirmacao de saida.
         """
         if self.show_confirm('Deseja realmente desconectar?') == gtk.RESPONSE_YES:
-            gobject.source_remove(self.thread_id)
             self.disconnect()
-            self.clients.clear()
-            self.set_treeview()
             
     
     def on_btn_settings_clicked(self, widget):
@@ -313,6 +322,11 @@ class GUI_Client(GUI):
                     pvts[k] = PVT(self.client, k, v)
                     return True
         return False
+    
+    
+    def clear(self):
+        """Limpa o chat"""
+        self.buffer.set_text('')
       
             
     def append_line(self, msg, color):
