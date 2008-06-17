@@ -318,7 +318,7 @@ class Server(Chat):
         w.append(" ++    /                                                               \    ++ ")
         w.append(" ++   |              ***    Welcome to PyTETA Server    ***             |   ++ ")
         w.append(" ++   |                                                                 |   ++ ")
-        w.append(" ++   |                                               version 0.0.1     |   ++ ")
+        w.append(" ++   |                                               version 1.0.0     |   ++ ")
         w.append(" ++   |                                                                 |   ++ ")
         w.append(" ++   |  Author:  Rogério Alencar Lino Filho                            |   ++ ")
         w.append(" ++   |  Website: http://rogeriolino.wordpress.com/                     |   ++ ")
