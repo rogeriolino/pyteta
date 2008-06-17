@@ -281,7 +281,7 @@ class Server(Chat):
     
     def disconnect(self):
         """Disconecta todas as conexoes"""
-        for cli in self.clients:
+        for cli in self.clients.values():
             self.remove(cli.get_id())
         self.socket.close()        
         print 'Disconnected'
