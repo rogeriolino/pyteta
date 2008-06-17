@@ -8,7 +8,7 @@
     P.A.T.E.T.A. (Protocolo Aberto de Transferência Especialmente para Trabalhos Acadêmicos)
     
     @author: Rogério Alencar Lino Filho
-    @version: 0.0.1
+    @version: 1.0.0
 
 """
 
