@@ -54,6 +54,8 @@ class GUI:
         """Exibe janela do tipo Alert"""
         return self.show_dialog(gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, msg)
             
+    def show_info(self, msg):        
+        return self.show_dialog(gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE, msg)
             
     def show_confirm(self, msg):
         """Exibe janela do tipo confirmacao (Cancel, OK) e retorna o valor escolhido"""

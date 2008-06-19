@@ -93,7 +93,7 @@ class GUI_Server(GUI):
             IOConf.INI['server_port'] = self.server.get_server_port()
             IOConf.INI['max_conn'] = self.server.get_max_conn()                
             IOConf.save_file()
-            self.show_alert('Dados salvos com sucesso.')
+            self.show_info('Dados salvos com sucesso.')
         except IMException, e:
             self.show_alert(e.get_message())
         
