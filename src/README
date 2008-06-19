@@ -1,0 +1,24 @@
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ +                                                              #
+ +        #####  #    #  #######  #####  #######   ##           #
+ +       #    #   # #      #     ###       #      # #           #
+ +      #####      #      #     #         #      #####          #
+ +     #         #       #     #####     #      #    #          #
+ +                                                              #
+ ################################################################
+ 
+                                               version 1.0.2
+ 
+ 
+ 1. ABOUT
+ 
+ PyTETA is a client-server chat basead in P.A.T.E.T.A. protocol.
+
+ The project contain the server and a client example, 
+ using gtk+ (glade).
+ 
+ 
+ 2. AUTHOR
+
+ Rogério Alencar Lino Filho
+ http://rogeriolino.wordpress.com/ 
