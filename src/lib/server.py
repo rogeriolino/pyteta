@@ -64,7 +64,11 @@ class Server(Chat):
             ip = addr[0]
             port = addr[1]
             while self.running:
-                full_data = conn.recv(self.get_data_size())
+                try:
+                    full_data = conn.recv(self.get_data_size())
+                except:
+                    time.sleep(0.1)
+                    continue
                 # cliente desconectou
                 if not full_data and client != None:
                     print 'Saiu  : %s, \tID: %s, \tIP: %s, \tPort: %s' % (client.get_nick_name(), client.get_id(), client.get_ip_address(), client.get_port())
