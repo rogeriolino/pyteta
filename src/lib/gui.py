@@ -11,19 +11,25 @@ import sys
 class GUI:
     """
         Classe mae
-    """
-    
+    """    
     
     def __init__(self):
-        pass
+        self.sep = os.path.sep
     
     def getDir(self):
         va = sys.argv[0]
-        if va[0] == "/":
+        if va[0] == self.sep:
             return os.path.dirname(va)
         else:
-            return os.path.dirname(os.getcwd()+"/"+va)
+            return os.path.dirname(os.getcwd() + self.sep + va)
         
+    
+    def getGladePath(self):
+        return self.getDir() + self.sep + 'glade' + self.sep
+    
+    def getImagesPath(self):
+        return self.getDir() + self.sep + 'imgs' + self.sep
+            
     
     def on_window_destroy(self, widget):
         """"""

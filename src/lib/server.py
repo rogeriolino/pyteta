@@ -116,7 +116,7 @@ class Server(Chat):
                                     nick = 'user_%s' % client.get_id()
                                 else:
                                     nick = receive.get_data().split()[0]
-                                    nick = nick[:20]
+                                    nick = nick[:self.MAX_NICK_LEN]
                                 client.set_nick_name(nick)
                                 # verifica se ja existe o nickname e adiciona caso nao exista
                                 if self.add_client(self.ini, client):
@@ -179,17 +179,18 @@ class Server(Chat):
                             print '%s say: %s' % (client.get_nick_name(), message.get_data())
                         # mensagem privada
                         elif data[0] == 'P':
-                            print 'recebeu privada'
                             # decodifica a mensagem para enviar ao destinatario
                             receive = Private(Message.CLIENT_SERVER)
                             receive.decode(data)
-                            # envia ao destinatario
-                            message = Private(Message.SERVER_CLIENT)
-                            message.set_id(client.get_id())
-                            message.set_data(receive.get_data())                           
-                            self.send_to(receive.get_id(), message.encode())
-                            # imprime mensagem para log/debug
-                            print '%s say to %s: %s' % (client.get_nick_name(), self.clients[receive.get_id()].get_nick_name(), receive.get_data())
+                            # verifica se o client ainda esta conectado
+                            if self.clients.has_key(receive.get_id()):
+                                # envia ao destinatario
+                                message = Private(Message.SERVER_CLIENT)
+                                message.set_id(client.get_id())
+                                message.set_data(receive.get_data())
+                                self.send_to(receive.get_id(), message.encode())
+                                # imprime mensagem para log/debug
+                                print '%s say to %s: %s' % (client.get_nick_name(), self.clients[receive.get_id()].get_nick_name(), receive.get_data())
                         # cliente enviou mensagem de saida
                         elif data[0] == 'S':
                             # decodifica a mensagem para enviar a todos
@@ -235,6 +236,7 @@ class Server(Chat):
         ini = IOConf.read()
         self.set_server_port(ini['server_port'])       
         self.MAX_CONN = ini['max_conn']
+        self.MAX_NICK_LEN = 20
         
     
     def send_connecteds(self, conn):
@@ -322,7 +324,7 @@ class Server(Chat):
         w.append(" ++    /                                                               \    ++ ")
         w.append(" ++   |              ***    Welcome to PyTETA Server    ***             |   ++ ")
         w.append(" ++   |                                                                 |   ++ ")
-        w.append(" ++   |                                               version 1.0.0     |   ++ ")
+        w.append(" ++   |                                               version 1.0.2     |   ++ ")
         w.append(" ++   |                                                                 |   ++ ")
         w.append(" ++   |  Author:  Rogério Alencar Lino Filho                            |   ++ ")
         w.append(" ++   |  Website: http://rogeriolino.wordpress.com/                     |   ++ ")

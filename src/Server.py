@@ -8,7 +8,7 @@
     P.A.T.E.T.A. (Protocolo Aberto de Transferência Especialmente para Trabalhos Acadêmicos)
     
     @author: Rogério Alencar Lino Filho
-    @version: 1.0.0
+    @version: 1.0.2
 
 """
 
@@ -17,8 +17,7 @@ if __name__ == '__main__':
     
     from lib.gui_server import *
     
-    try:
-        
+    try:        
         
         server = GUI_Server()
         server.start()

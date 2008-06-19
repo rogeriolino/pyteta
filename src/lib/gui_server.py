@@ -27,7 +27,7 @@ class GUI_Server(GUI):
     def start(self):
         """Exibe a janela do server"""
         try:           
-            self.xml = gtk.glade.XML('%s/glade/server.glade' % self.getDir())
+            self.xml = gtk.glade.XML(self.getGladePath() + 'server.glade')
             self.xml.signal_autoconnect(self)
             self.window = self.xml.get_widget('server')            
             self.set_buttons()

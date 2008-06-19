@@ -4,6 +4,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gtk.glade, gobject
 
+from time import sleep
 from time import strftime
 
 from chat import *
@@ -17,7 +18,6 @@ pvts = {}
 
 
 class GUI_Client(GUI):
-
    
     
     def __init__(self):
@@ -29,16 +29,64 @@ class GUI_Client(GUI):
         # usuario
         self.client = Client()
         # todos clientes conectados
-        self.clients = {}        
+        self.clients = {} 
+        
+        
+    def createTray(self):
+        """Cria Icone na bandeja e menu popup (ao clicar-lo com o botao direito)"""
+        # TrayIcon
+        self.statusIcon = gtk.StatusIcon()      
+ 
+        self.menu = gtk.Menu()
+        
+        self.menuItem = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+        #self.menuItem.connect('activate', self.gtk_main_quit)
+        self.menu.append(self.menuItem)
+        
+        self.menuItem = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        self.menuItem.connect('activate', self.gtk_main_quit)
+        self.menu.append(self.menuItem)
+        
+        self.imageicon = gtk.Image()
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.getImagesPath() + 'icon2.png')
+        scaled_buf = pixbuf.scale_simple(23, 23, gtk.gdk.INTERP_BILINEAR)
+        self.statusIcon.set_from_pixbuf(scaled_buf)
+        
+        self.statusIcon.set_tooltip(self.title)
+        self.statusIcon.connect('activate', self.activate_icon_cb)
+        self.statusIcon.connect('popup-menu', self.show_popup_menu, self.menu)
+        self.statusIcon.set_visible(1)        
+        
+        
+    def remove_popup(widget, event, data = None):
+        """Remove o menu popup"""
+        if data:
+            data.set_blinking(1)
+        return 0
+        
+        
+    def activate_icon_cb(self, widget, data = None):
+        """Ao clicar com o botao esquerdo"""
+        self.window.set_focus(1)
+    
+    
+    def show_popup_menu(self, widget, button, time, data = None):
+        """Exibe o menu popup ao clicar no StatusIcon com o botao direito"""
+        if button == 3:
+            if data:
+                data.show_all()
+                data.popup(None, None, None, 3, time)
+            
         
     def start(self):
         """Inicia o programa"""
         try:
-            self.xml = gtk.glade.XML('%s/glade/chat.glade' % self.getDir())
+            # StatusIcon
+            self.createTray()
+            self.xml = gtk.glade.XML(self.getGladePath() + 'chat.glade')
             self.xml.signal_autoconnect(self)
             # Window
-            self.window = self.xml.get_widget('chat')            
-            self.window.add_events(gtk.gdk.BUTTON_PRESS_MASK) # eventos de botao
+            self.window = self.xml.get_widget('chat')
             self.window.set_title(self.title)
             self.window.maximize()
             # TextView
@@ -63,7 +111,7 @@ class GUI_Client(GUI):
         # mark
         self.mark = self.buffer.create_mark("end", self.buffer.get_end_iter(), False)
         # background
-        self.pixmap, mask = gtk.gdk.pixbuf_new_from_file('%s/imgs/pateta.png' % self.getDir()).render_pixmap_and_mask()
+        self.pixmap, mask = gtk.gdk.pixbuf_new_from_file(self.getImagesPath() + 'pateta.png').render_pixmap_and_mask()
         self.txt_chat.get_window(gtk.TEXT_WINDOW_TEXT).set_back_pixmap(self.pixmap, False)
         self.txt_send = self.xml.get_widget('txt_send')
         self.txt_send.connect("activate", self.on_btn_send_clicked)
@@ -211,7 +259,21 @@ class GUI_Client(GUI):
             if cmd[0] == '/pvt' and cmd[1] in self.clients.values():
                 return True
         return False
-
+    
+    def alert(self):
+        self.start_alert()
+        gobject.timeout_add(1500, self.stop_alert)
+        
+    
+    def start_alert(self):
+        """Alerta o usuario sobre envio de novas mensagens"""
+        self.statusIcon.set_blinking(1)
+        
+        
+    def stop_alert(self):
+        """Para o alerta"""        
+        self.statusIcon.set_blinking(0)
+        
         
     def disconnect(self):
         """Desconecta do servidor"""
@@ -338,6 +400,7 @@ class GUI_Client(GUI):
         tag.set_property("weight", 600)
         self.buffer.insert_with_tags(self.buffer.get_end_iter(), '%s\n' % msg, tag)
         self.txt_chat.scroll_to_mark(self.mark, 0.05, True, 0.0, 1.0)
+        self.alert()
     
     
     def client_signout(self, nickname, msg):
@@ -403,7 +466,7 @@ class Settings(GUI_Client):
     def show(self):
     	"""Exibe a janela de configuracao"""
     	try:
-            self.xml = gtk.glade.XML('%s/glade/settings.glade' % self.getDir())
+            self.xml = gtk.glade.XML(self.getGladePath() + 'settings.glade')
             self.xml.signal_autoconnect(self)
             self.window = self.xml.get_widget('settings')
             self.set_inputs()
@@ -448,7 +511,7 @@ class PVT(GUI_Client):
     
     def __init__(self, client, dest_id, dest_nick):
         GUI_Client.__init__(self)
-        self.xml = gtk.glade.XML('%s/glade/pvt.glade' % self.getDir())
+        self.xml = gtk.glade.XML(self.getGladePath() + 'pvt.glade')
         self.xml.signal_autoconnect(self)
         self.window = self.xml.get_widget('pvt')
         # id do cliente destino
@@ -466,14 +529,10 @@ class PVT(GUI_Client):
         self.sbuffer = self.send.get_buffer()
         self.receive = self.xml.get_widget('txt_receive')
         self.rbuffer = self.receive.get_buffer()
-        #self.send.set_size_request(0, 50)
         # mark
-        self.mark = self.rbuffer.create_mark("end", self.rbuffer.get_end_iter(), False)
-        
-        self.receive = self.xml.get_widget('txt_receive')
-        
+        self.mark = self.rbuffer.create_mark("end", self.rbuffer.get_end_iter(), False)        
+        self.receive = self.xml.get_widget('txt_receive')        
         self.btn = self.xml.get_widget('btn_send')
-        #self.btn.set_size_request(50, 50)
         
     
     def on_btn_send_clicked(self, widget):
